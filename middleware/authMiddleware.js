@@ -17,6 +17,7 @@ exports.protect = (req, res, next) => {
         console.log('Authorization successful');
         next();
     } catch (err) {
+        console.error('Token verification failed:', err);
         res.status(401).json({ message: 'Token is not valid' });
     }
 }

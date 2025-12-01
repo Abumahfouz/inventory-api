@@ -2,24 +2,23 @@ const User = require("../models/userModel");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 
-// @route   POST /api/signup
+// @route   POST /api/register
 exports.createUser = async (req, res) => {
   // Debug log to see what's in the request
   console.log('Received request body:', req.body);
 
   // Guard in case req.body is undefined 
-  const {role, email, password} = req.body || {};
+  let {role, email, password} = req.body || {};
   
   if (!email || !password) {
     return res.status(400).json({ message: 'email and password are required' });
   }
-  
+
   if (!role) role = 'customer'; // default role
 
   try {
     const existingUser = await User.findOne({ email });
-    if (existingUser)
-      return res.status(400).json({ message: "User already exists" });
+    if (existingUser) return res.status(400).json({ message: "User already exists" });
     const hashedPassword = await bcrypt.hash(password, 10);
     const newUser = new User({ email, password: hashedPassword });
     await newUser.save();
@@ -40,19 +39,17 @@ exports.login = async (req, res) => {
     const user = await User.findOne({ email });
     if (!user)
       return res.status(400).json({ message: "Invalid credentials" });
-    // if (!user.role === role || !user.role)
-    //   return res.status(400).json({ message: "Invalid role" });
-
+    
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch)
       return res.status(400).json({ message: "Invalid credentials" });
 
     // Create JWT
-    const payload = { userId: user._id };
+    const payload = { userId: user._id, role: user.role };
     const token = jwt.sign(payload, process.env.JWT_SECRET, {
       expiresIn: process.env.JWT_EXPIRES_IN,
     });
-    res.json({ message: "✅ Login successful", token });
+    res.json({ message: "✅ Login successful", token, role: user.role });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

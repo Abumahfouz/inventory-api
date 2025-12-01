@@ -8,6 +8,8 @@ app.use(express.json());
 app.use('/api/v1/products', require('./routes/productRoutes'));
 app.use('/api/v1/reviews', require('./routes/reviewRoutes'));
 app.use('/api/v1/users', require('./routes/authRoutes'));
+app.use('/api/v1/orders', require('./routes/orderRoutes'));
+// Placeholder for version 2
 app.use('/api/v2/products', (req, res)=> res.send("Version 2 coming soon!"));
 
 
